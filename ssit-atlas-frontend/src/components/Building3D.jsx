@@ -1,19 +1,38 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, Suspense } from 'react';
 import { Text } from '@react-three/drei';
+import { useLoader } from '@react-three/fiber';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
 import * as THREE from 'three';
+import { campusCenter } from '../data/CampusMapData';
 
 const Building3D = ({ building, onClick, scale = 10000 }) => {
     const [hovered, setHovered] = useState(false);
     const meshRef = useRef();
 
+    // If building has a 3D model, render it
+    if (building.modelPath) {
+        return (
+            <Suspense fallback={null}>
+                <OBJModel
+                    building={building}
+                    onClick={onClick}
+                    hovered={hovered}
+                    setHovered={setHovered}
+                    scale={scale}
+                />
+            </Suspense>
+        );
+    }
+
+    // Otherwise, use procedural geometry
     // Convert lat/lng polygon to 3D positions
     const convertToLocal = (polygon, center) => {
-        // Reference center for local coordinates
+        // Reference center for local coordinates is the building center itself
         const refLat = center[0];
         const refLng = center[1];
 
         return polygon.map(([lat, lng]) => {
-            // Convert geographic coordinates to local meters
+            // Convert geographic coordinates to local meters relative to building center
             const x = (lng - refLng) * scale;
             const z = (lat - refLat) * scale;
             return [x, z];
@@ -43,9 +62,9 @@ const Building3D = ({ building, onClick, scale = 10000 }) => {
         bevelEnabled: false,
     };
 
-    // Convert center to local 3D position
-    const centerX = (building.center[1] - building.center[1]) * scale;
-    const centerZ = (building.center[0] - building.center[0]) * scale;
+    // Convert center to local 3D position relative to Campus Center
+    const centerX = (building.center[1] - campusCenter[1]) * scale;
+    const centerZ = (building.center[0] - campusCenter[0]) * scale;
 
     return (
         <group position={[centerX, 0, centerZ]}>
@@ -106,6 +125,75 @@ const Building3D = ({ building, onClick, scale = 10000 }) => {
                     <lineBasicMaterial attach="material" color="#8B4513" linewidth={2} />
                 </lineSegments>
             </mesh>
+        </group>
+    );
+};
+
+// Component for rendering OBJ models
+const OBJModel = ({ building, onClick, hovered, setHovered, scale }) => {
+    const meshRef = useRef();
+
+    // Load OBJ model
+    const obj = useLoader(OBJLoader, building.modelPath);
+
+    // Clone the model to avoid issues with multiple instances
+    const clonedObj = obj.clone();
+
+    // Calculate position based on building center relative to Campus Center
+    const centerX = (building.center[1] - campusCenter[1]) * scale;
+    const centerZ = (building.center[0] - campusCenter[0]) * scale;
+
+    const modelScale = building.modelScale || 0.01;
+
+    // Apply material properties to all meshes in the model
+    clonedObj.traverse((child) => {
+        if (child instanceof THREE.Mesh) {
+            // Create a new material with better appearance
+            child.material = new THREE.MeshStandardMaterial({
+                color: hovered ? '#e5bd8a' : (building.color || '#d4a574'),
+                roughness: 0.7,
+                metalness: 0.2,
+            });
+            child.castShadow = true;
+            child.receiveShadow = true;
+        }
+    });
+
+    return (
+        <group
+            ref={meshRef}
+            position={[centerX, 0, centerZ]}
+            onClick={(e) => {
+                e.stopPropagation();
+                onClick(building);
+            }}
+            onPointerOver={(e) => {
+                e.stopPropagation();
+                setHovered(true);
+                document.body.style.cursor = 'pointer';
+            }}
+            onPointerOut={() => {
+                setHovered(false);
+                document.body.style.cursor = 'default';
+            }}
+        >
+            {/* The scaled model */}
+            <group scale={[modelScale, modelScale, modelScale]}>
+                <primitive object={clonedObj} />
+            </group>
+
+            {/* Building Label */}
+            <Text
+                position={[0, (building.height || 15) + 5, 0]}
+                fontSize={3}
+                color="#000000"
+                anchorX="center"
+                anchorY="middle"
+                outlineWidth={0.2}
+                outlineColor="#ffffff"
+            >
+                {building.name}
+            </Text>
         </group>
     );
 };
