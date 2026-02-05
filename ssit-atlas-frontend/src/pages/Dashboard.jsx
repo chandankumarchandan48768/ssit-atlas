@@ -1,5 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import CreateNotice from '../components/notices/CreateNotice';
+import NoticeList from '../components/notices/NoticeList';
+import PlacementStats from '../components/placements/PlacementStats';
+import AddPlacementRecord from '../components/placements/AddPlacementRecord';
+import PlacementList from '../components/placements/PlacementList';
+import CreateEvent from '../components/events/CreateEvent';
+import BuildingManager from '../components/management/BuildingManager';
 
 import api from '../api/axios';
 
@@ -75,59 +82,159 @@ const AdminSection = () => (
 );
 
 
-const CulturalSection = () => (
-    <div className="bg-purple-50 dark:bg-gray-700 p-6 rounded-lg">
-        <h3 className="text-lg font-bold mb-4 text-purple-800 dark:text-purple-300">Event Management</h3>
-        <button className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 mr-4">Create New Event</button>
-        <button className="bg-white text-purple-600 border border-purple-600 px-4 py-2 rounded hover:bg-purple-50">Manage Events</button>
-    </div>
-);
+const CulturalSection = ({ user }) => {
+    const [isCreatingEvent, setIsCreatingEvent] = useState(false);
 
-const ManagementSection = () => (
-    <div className="bg-orange-50 dark:bg-gray-700 p-6 rounded-lg">
-        <h3 className="text-lg font-bold mb-4 text-orange-800 dark:text-orange-300">Infrastructure Management</h3>
-        <button className="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700 mr-4">Update Building Data</button>
-        <button className="bg-white text-orange-600 border border-orange-600 px-4 py-2 rounded hover:bg-orange-50">View Campus Stats</button>
-    </div>
-);
+    return (
+        <div className="bg-purple-50 dark:bg-gray-700 p-6 rounded-lg">
+            <h3 className="text-lg font-bold mb-4 text-purple-800 dark:text-purple-300">Event Management</h3>
+            <button
+                onClick={() => setIsCreatingEvent(!isCreatingEvent)}
+                className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 mr-4"
+            >
+                {isCreatingEvent ? 'Cancel' : 'Create New Event'}
+            </button>
+            <Link to="/events" className="bg-white text-purple-600 border border-purple-600 px-4 py-2 rounded hover:bg-purple-50 inline-block">Manage Events</Link>
 
-const PlacementSection = () => (
-    <div className="bg-indigo-50 dark:bg-gray-700 p-6 rounded-lg">
-        <h3 className="text-lg font-bold mb-4 text-indigo-800 dark:text-indigo-300">Placement Cell</h3>
-        <button className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 mr-4">Add Placement Record</button>
-        <button className="bg-white text-indigo-600 border border-indigo-600 px-4 py-2 rounded hover:bg-indigo-50">View Statistics</button>
-    </div>
-);
+            {isCreatingEvent && (
+                <div className="mt-4">
+                    <CreateEvent
+                        onClose={() => setIsCreatingEvent(false)}
+                        onEventCreated={() => alert('Event created! You can view it on the Events page.')}
+                    />
+                </div>
+            )}
+        </div>
+    );
+};
 
-const HodSection = ({ user }) => (
-    <div className="bg-teal-50 dark:bg-gray-700 p-6 rounded-lg">
-        <h3 className="text-lg font-bold mb-4 text-teal-800 dark:text-teal-300">Department Head: {user.department}</h3>
-        <button className="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700 mr-4">Post Notice</button>
-        <button className="bg-white text-teal-600 border border-teal-600 px-4 py-2 rounded hover:bg-teal-50">Department Achievements</button>
-    </div>
-);
+const ManagementSection = () => {
+    const [isManagingBuildings, setIsManagingBuildings] = useState(false);
+
+    return (
+        <div className="bg-orange-50 dark:bg-gray-700 p-6 rounded-lg">
+            <h3 className="text-lg font-bold mb-4 text-orange-800 dark:text-orange-300">Infrastructure Management</h3>
+            <button
+                onClick={() => setIsManagingBuildings(!isManagingBuildings)}
+                className="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700 mr-4"
+            >
+                {isManagingBuildings ? 'Close Manager' : 'Update Building Data'}
+            </button>
+            <button className="bg-white text-orange-600 border border-orange-600 px-4 py-2 rounded hover:bg-orange-50">View Campus Stats</button>
+
+            {isManagingBuildings && (
+                <div className="mt-4">
+                    <BuildingManager onClose={() => setIsManagingBuildings(false)} />
+                </div>
+            )}
+        </div>
+    );
+};
+
+const PlacementSection = ({ user }) => {
+    const [isAddingRecord, setIsAddingRecord] = useState(false);
+
+    return (
+        <div className="space-y-6">
+            <div className="bg-indigo-50 dark:bg-gray-700 p-6 rounded-lg">
+                <h3 className="text-lg font-bold mb-4 text-indigo-800 dark:text-indigo-300">Placement Cell</h3>
+                <button
+                    onClick={() => setIsAddingRecord(!isAddingRecord)}
+                    className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 mr-4"
+                >
+                    {isAddingRecord ? 'Cancel' : 'Add Placement Record'}
+                </button>
+                <button className="bg-white text-indigo-600 border border-indigo-600 px-4 py-2 rounded hover:bg-indigo-50">View Statistics</button>
+            </div>
+
+            <PlacementStats />
+
+            {isAddingRecord && (
+                <AddPlacementRecord
+                    onClose={() => setIsAddingRecord(false)}
+                    onRecordAdded={() => window.location.reload()}
+                />
+            )}
+
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                <h3 className="text-xl font-bold mb-4">Recent Placements</h3>
+                <PlacementList />
+            </div>
+        </div>
+    );
+};
+
+const HodSection = ({ user }) => {
+    const [isCreatingNotice, setIsCreatingNotice] = useState(false);
+
+    return (
+        <div className="space-y-6">
+            <div className="bg-teal-50 dark:bg-gray-700 p-6 rounded-lg">
+                <h3 className="text-lg font-bold mb-4 text-teal-800 dark:text-teal-300">Department Head: {user.department}</h3>
+                <button
+                    onClick={() => setIsCreatingNotice(!isCreatingNotice)}
+                    className="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700 mr-4"
+                >
+                    {isCreatingNotice ? 'Cancel' : 'Post Notice'}
+                </button>
+                <button className="bg-white text-teal-600 border border-teal-600 px-4 py-2 rounded hover:bg-teal-50">Department Achievements</button>
+            </div>
+
+            {isCreatingNotice && (
+                <CreateNotice
+                    user={user}
+                    onClose={() => setIsCreatingNotice(false)}
+                    onNoticeCreated={() => window.location.reload()} // Simple reload to refresh list for now
+                />
+            )}
+
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                <h3 className="text-xl font-bold mb-4">Department Notices</h3>
+                <NoticeList department={user.department} />
+            </div>
+        </div>
+    );
+};
 
 const FacultySection = ({ user }) => (
     <div className="bg-cyan-50 dark:bg-gray-700 p-6 rounded-lg">
         <h3 className="text-lg font-bold mb-4 text-cyan-800 dark:text-cyan-300">Faculty Portal: {user.department}</h3>
         <button className="bg-cyan-600 text-white px-4 py-2 rounded hover:bg-cyan-700 mr-4">My Achievements</button>
         <button className="bg-white text-cyan-600 border border-cyan-600 px-4 py-2 rounded hover:bg-cyan-50">Class Schedule</button>
+
+        <div className="mt-8">
+            <h4 className="font-bold mb-2">Department Notices</h4>
+            <NoticeList department={user.department} />
+        </div>
     </div>
 );
 
-const StudentSection = () => (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-yellow-50 dark:bg-gray-700 p-4 rounded-lg text-center">
-            <h3 className="font-bold text-yellow-800 dark:text-yellow-300 mb-2">My Placements</h3>
-            <button className="text-sm underline text-yellow-700">View Status</button>
+const StudentSection = ({ user }) => (
+    <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-yellow-50 dark:bg-gray-700 p-4 rounded-lg text-center">
+                <h3 className="font-bold text-yellow-800 dark:text-yellow-300 mb-2">My Placements</h3>
+                <button className="text-sm underline text-yellow-700">View Status</button>
+            </div>
+            <div className="bg-pink-50 dark:bg-gray-700 p-4 rounded-lg text-center">
+                <h3 className="font-bold text-pink-800 dark:text-pink-300 mb-2">Events Registered</h3>
+                <button className="text-sm underline text-pink-700">View Tickets</button>
+            </div>
+            <div className="bg-gray-50 dark:bg-gray-600 p-4 rounded-lg text-center">
+                <h3 className="font-bold text-gray-800 dark:text-gray-300 mb-2">Notices</h3>
+                <button className="text-sm underline text-gray-700 dark:text-gray-200">Check Inbox</button>
+            </div>
         </div>
-        <div className="bg-pink-50 dark:bg-gray-700 p-4 rounded-lg text-center">
-            <h3 className="font-bold text-pink-800 dark:text-pink-300 mb-2">Events Registered</h3>
-            <button className="text-sm underline text-pink-700">View Tickets</button>
-        </div>
-        <div className="bg-gray-50 dark:bg-gray-600 p-4 rounded-lg text-center">
-            <h3 className="font-bold text-gray-800 dark:text-gray-300 mb-2">Notices</h3>
-            <button className="text-sm underline text-gray-700 dark:text-gray-200">Check Inbox</button>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                <h3 className="text-xl font-bold mb-4">Pinned Notices</h3>
+                <NoticeList showPinnedOnly={true} />
+            </div>
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                <h3 className="text-xl font-bold mb-4">Department Notices ({user.department})</h3>
+                <NoticeList department={user.department} />
+            </div>
         </div>
     </div>
 );

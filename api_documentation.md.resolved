@@ -1,0 +1,243 @@
+# API Documentation
+
+This document lists all the available API endpoints in the SSIT Atlas backend, including their methods, URLs, example request bodies, and descriptions.
+
+## Authentication (`AuthController`)
+
+### Register User
+*   **Method:** `POST`
+*   **URL:** `/api/auth/register`
+*   **Description:** Registers a new user. HODs must specify a department.
+*   **Body:**
+    ```json
+    {
+      "name": "John Doe",
+      "email": "john.doe@ssit.edu.in",
+      "password": "password123",
+      "role": "STUDENT",  // Options: STUDENT, FACULTY, HOD, etc.
+      "department": "CSE", // Required for HOD/FACULTY
+      "phoneNumber": "9876543210"
+    }
+    ```
+
+### Login
+*   **Method:** `POST`
+*   **URL:** `/api/auth/login`
+*   **Description:** Authenticates a user and returns a JWT token.
+*   **Body:**
+    ```json
+    {
+      "email": "john.doe@ssit.edu.in",
+      "password": "password123"
+    }
+    ```
+
+### Get Current User
+*   **Method:** `GET`
+*   **URL:** `/api/auth/me`
+*   **Description:** Returns the profile of the logged-in user.
+*   **Body:** None
+
+---
+
+## Notices ([NoticeController](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-backend/src/main/java/com/ssit/atlas/controller/NoticeController.java#15-98))
+
+### Get Notices
+*   **Method:** `GET`
+*   **URL:** `/api/notices`
+*   **Description:** Retrieves all notices.
+*   **Body:** None
+
+### Create Notice
+*   **Method:** `POST`
+*   **URL:** `/api/notices`
+*   **Description:** Creates a notice (HOD/ADMIN only).
+*   **Body:**
+    ```json
+    {
+      "title": "Semester Exams",
+      "content": "Exams start on...",
+      "noticeType": "CIRCULAR",
+      "priority": "IMPORTANT",
+      "targetAudience": "STUDENTS",
+      "department": "CSE"
+    }
+    ```
+
+---
+
+## Events (`EventController`)
+
+### Get Events
+*   **Method:** `GET`
+*   **URL:** `/api/events`
+*   **Description:** Retrieves upcoming events.
+*   **Body:** None
+
+### Create Event
+*   **Method:** `POST`
+*   **URL:** `/api/events`
+*   **Description:** Creates an event (CULTURAL_COMMITTEE/ADMIN).
+*   **Body:**
+    ```json
+    {
+      "title": "Hackathon 2024",
+      "description": "24-hour coding challenge.",
+      "startTime": "2024-05-10T09:00:00",
+      "endTime": "2024-05-11T18:00:00",
+      "eventType": "TECHNICAL",
+      "organizer": "Coding Club",
+      "capacity": 100,
+      "registrationRequired": true
+    }
+    ```
+
+### Register/Cancel
+*   **Method:** `POST`/`DELETE`
+*   **URL:** `/api/events/{id}/register`
+*   **Description:** Register or cancel registration for an event.
+*   **Body:** None
+
+---
+
+## Placements (`PlacementController`)
+
+### Get Stats
+*   **Method:** `GET`
+*   **URL:** `/api/placements/stats/{academicYear}`
+*   **Description:** Returns placement statistics.
+*   **Body:** None
+
+### Add Record
+*   **Method:** `POST`
+*   **URL:** `/api/placements`
+*   **Description:** Adds a placement record (PLACEMENT_DEPT/ADMIN).
+*   **Body:**
+    ```json
+    {
+      "studentName": "Jane Doe",
+      "studentUsn": "1SS20CS002",
+      "department": "CSE",
+      "companyName": "Microsoft",
+      "jobRole": "SDE",
+      "packageAmount": 45.0,
+      "packageType": "CTC",
+      "academicYear": "2024-25"
+    }
+    ```
+
+---
+
+## Lost & Found ([LostItemController](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-backend/src/main/java/com/ssit/atlas/controller/LostItemController.java#10-43))
+
+### Get Items
+*   **Method:** `GET`
+*   **URL:** `/api/lost-found?status={status}`
+*   **Description:** Filter by `LOST` or `FOUND`.
+*   **Body:** None
+
+### Report Item
+*   **Method:** `POST`
+*   **URL:** `/api/lost-found`
+*   **Description:** Report a lost/found item.
+*   **Body:**
+    ```json
+    {
+      "title": "Blue Bag",
+      "description": "Lost in canteen.",
+      "location": "Canteen",
+      "contactInfo": "9999999999",
+      "status": "LOST"
+    }
+    ```
+
+### Update Status
+*   **Method:** `PUT`
+*   **URL:** `/api/lost-found/{id}/status?status={newStatus}`
+*   **Description:** Mark item as FOUND/RETURNED.
+
+---
+
+## Navigation & Infrastructure
+
+### Get Buildings
+*   **Method:** `GET`
+*   **URL:** `/api/buildings` (`BuildingController`)
+*   **Description:** List all buildings.
+
+### Get Rooms
+*   **Method:** `GET`
+*   **URL:** `/api/rooms?buildingId={id}` ([RoomController](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-backend/src/main/java/com/ssit/atlas/controller/RoomController.java#10-36))
+*   **Description:** List rooms, optionally filtered by building.
+
+### Calculate Route
+*   **Method:** `POST`
+*   **URL:** `/api/navigation/route` ([NavigationController](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-backend/src/main/java/com/ssit/atlas/controller/NavigationController.java#14-45))
+*   **Description:** Get shortest path between nodes.
+*   **Body:**
+    ```json
+    {
+      "sourceNodeId": "node_1",
+      "targetNodeId": "node_5"
+    }
+    ```
+
+### Map Data
+*   **Method:** `GET`
+*   **URL:** `/api/navigation/nodes` / `/api/navigation/edges`
+*   **Description:** Get graph nodes and edges for rendering the map.
+
+---
+
+## Social & Gamification
+
+### Friend Location
+*   **Method:** `POST`
+*   **URL:** `/api/friends/location` ([FriendLocationController](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-backend/src/main/java/com/ssit/atlas/controller/FriendLocationController.java#13-37))
+*   **Description:** Update current location visibility.
+*   **Body:**
+    ```json
+    {
+      "nodeId": "library_entrance",
+      "visibility": "FRIENDS" // FRIENDS, PUBLIC, NONE
+    }
+    ```
+
+### View Friends
+*   **Method:** `GET`
+*   **URL:** `/api/friends/visible`
+*   **Description:** Get locations of visible friends.
+
+### Achievements
+*   **Method:** `GET`
+*   **URL:** `/api/achievements` ([AchievementController](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-backend/src/main/java/com/ssit/atlas/controller/AchievementController.java#11-40))
+*   **Description:** List achievements.
+
+### Create Achievement
+*   **Method:** `POST`
+*   **URL:** `/api/achievements`
+*   **Description:** Add a new achievement (HOD/FACULTY).
+*   **Body:**
+    ```json
+    {
+      "title": "Best Project",
+      "description": "Awarded for...",
+      "date": "2024-05-20",
+      "department": "CSE",
+      "recipientName": "Team A"
+    }
+    ```
+
+---
+
+## Admin ([UserController](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-backend/src/main/java/com/ssit/atlas/controller/UserController.java#10-32) / [AuditController](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-backend/src/main/java/com/ssit/atlas/controller/AuditController.java#11-26))
+
+### Manage Users
+*   **Method:** `GET` / `DELETE`
+*   **URL:** `/api/users` / `/api/users/{id}`
+*   **Description:** List or delete users (ADMIN only).
+
+### Audit Logs
+*   **Method:** `GET`
+*   **URL:** `/api/audit-logs`
+*   **Description:** View system audit logs (ADMIN only).
