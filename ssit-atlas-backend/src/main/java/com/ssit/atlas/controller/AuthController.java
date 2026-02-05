@@ -3,6 +3,10 @@ package com.ssit.atlas.controller;
 import com.ssit.atlas.dto.AuthRequest;
 import com.ssit.atlas.dto.AuthResponse;
 import com.ssit.atlas.dto.RegisterRequest;
+import com.ssit.atlas.dto.UserResponse;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
 import com.ssit.atlas.service.AuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,5 +32,11 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> authenticate(@RequestBody AuthRequest request) {
         return ResponseEntity.ok(authService.authenticate(request));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return ResponseEntity.ok(authService.getCurrentUser(auth.getName()));
     }
 }

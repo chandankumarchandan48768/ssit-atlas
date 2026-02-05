@@ -7,15 +7,20 @@ public class RegisterRequest {
     private String email;
     private String password;
     private User.Role role;
+    private String department;
+    private String phoneNumber;
 
     public RegisterRequest() {
     }
 
-    public RegisterRequest(String name, String email, String password, User.Role role) {
+    public RegisterRequest(String name, String email, String password, User.Role role, String department,
+            String phoneNumber) {
         this.name = name;
         this.email = email;
         this.password = password;
         this.role = role;
+        this.department = department;
+        this.phoneNumber = phoneNumber;
     }
 
     public String getName() {
@@ -50,6 +55,22 @@ public class RegisterRequest {
         this.role = role;
     }
 
+    public String getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(String department) {
+        this.department = department;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
     public static RegisterRequestBuilder builder() {
         return new RegisterRequestBuilder();
     }
@@ -59,6 +80,8 @@ public class RegisterRequest {
         private String email;
         private String password;
         private User.Role role;
+        private String department;
+        private String phoneNumber;
 
         RegisterRequestBuilder() {
         }
@@ -83,8 +106,18 @@ public class RegisterRequest {
             return this;
         }
 
+        public RegisterRequestBuilder department(String department) {
+            this.department = department;
+            return this;
+        }
+
+        public RegisterRequestBuilder phoneNumber(String phoneNumber) {
+            this.phoneNumber = phoneNumber;
+            return this;
+        }
+
         public RegisterRequest build() {
-            return new RegisterRequest(name, email, password, role);
+            return new RegisterRequest(name, email, password, role, department, phoneNumber);
         }
     }
 }

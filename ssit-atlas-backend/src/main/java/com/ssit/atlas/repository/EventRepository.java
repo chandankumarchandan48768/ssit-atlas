@@ -8,4 +8,6 @@ import java.util.List;
 @Repository
 public interface EventRepository extends MongoRepository<Event, String> {
     List<Event> findByBuildingId(String buildingId);
+
+    List<Event> findByStartTimeAfter(java.time.LocalDateTime startTime);
 }

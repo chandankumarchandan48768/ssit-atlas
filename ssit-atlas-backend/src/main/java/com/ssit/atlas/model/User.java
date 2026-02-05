@@ -18,20 +18,28 @@ public class User {
     @CreatedDate
     private LocalDateTime createdAt;
 
+    private String department;
+    private String phoneNumber;
+    private boolean isActive = true;
+
     public enum Role {
-        STUDENT, FACULTY, ADMIN
+        STUDENT, FACULTY, ADMIN, CULTURAL_COMMITTEE, MANAGEMENT_TEAM, PLACEMENT_DEPARTMENT, HOD
     }
 
     public User() {
     }
 
-    public User(String id, String name, String email, String passwordHash, Role role, LocalDateTime createdAt) {
+    public User(String id, String name, String email, String passwordHash, Role role, LocalDateTime createdAt,
+            String department, String phoneNumber, boolean isActive) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.passwordHash = passwordHash;
         this.role = role;
         this.createdAt = createdAt;
+        this.department = department;
+        this.phoneNumber = phoneNumber;
+        this.isActive = isActive;
     }
 
     public String getId() {
@@ -82,6 +90,30 @@ public class User {
         this.createdAt = createdAt;
     }
 
+    public String getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(String department) {
+        this.department = department;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+    }
+
     public static UserBuilder builder() {
         return new UserBuilder();
     }
@@ -93,6 +125,9 @@ public class User {
         private String passwordHash;
         private Role role;
         private LocalDateTime createdAt;
+        private String department;
+        private String phoneNumber;
+        private boolean isActive = true;
 
         UserBuilder() {
         }
@@ -127,8 +162,23 @@ public class User {
             return this;
         }
 
+        public UserBuilder department(String department) {
+            this.department = department;
+            return this;
+        }
+
+        public UserBuilder phoneNumber(String phoneNumber) {
+            this.phoneNumber = phoneNumber;
+            return this;
+        }
+
+        public UserBuilder isActive(boolean isActive) {
+            this.isActive = isActive;
+            return this;
+        }
+
         public User build() {
-            return new User(id, name, email, passwordHash, role, createdAt);
+            return new User(id, name, email, passwordHash, role, createdAt, department, phoneNumber, isActive);
         }
     }
 }

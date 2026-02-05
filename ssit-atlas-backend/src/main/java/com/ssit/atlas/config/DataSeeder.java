@@ -34,12 +34,14 @@ public class DataSeeder implements CommandLineRunner {
         }
 
         @Override
+        @SuppressWarnings("null")
         public void run(String... args) throws Exception {
+                // Check if data already seeded
                 if (userRepository.existsByEmail("admin@ssit.edu.in")) {
-                        return; // Data already seeded
+                        return;
                 }
 
-                // 1. Create User
+                // 1. Create Users for all Roles
                 User admin = User.builder()
                                 .name("Admin User")
                                 .email("admin@ssit.edu.in")
@@ -48,6 +50,63 @@ public class DataSeeder implements CommandLineRunner {
                                 .createdAt(LocalDateTime.now())
                                 .build();
                 userRepository.save(admin);
+
+                User cultural = User.builder()
+                                .name("Cultural Committee")
+                                .email("cultural@ssit.edu.in")
+                                .passwordHash(passwordEncoder.encode("cultural123"))
+                                .role(User.Role.CULTURAL_COMMITTEE)
+                                .createdAt(LocalDateTime.now())
+                                .build();
+                userRepository.save(cultural);
+
+                User management = User.builder()
+                                .name("Management Team")
+                                .email("management@ssit.edu.in")
+                                .passwordHash(passwordEncoder.encode("manage123"))
+                                .role(User.Role.MANAGEMENT_TEAM)
+                                .createdAt(LocalDateTime.now())
+                                .build();
+                userRepository.save(management);
+
+                User placement = User.builder()
+                                .name("Placement Dept")
+                                .email("placement@ssit.edu.in")
+                                .passwordHash(passwordEncoder.encode("place123"))
+                                .role(User.Role.PLACEMENT_DEPARTMENT)
+                                .createdAt(LocalDateTime.now())
+                                .build();
+                userRepository.save(placement);
+
+                User hodCse = User.builder()
+                                .name("HOD CSE")
+                                .email("hod.cse@ssit.edu.in")
+                                .passwordHash(passwordEncoder.encode("hodcse123"))
+                                .role(User.Role.HOD)
+                                .department("CSE")
+                                .createdAt(LocalDateTime.now())
+                                .build();
+                userRepository.save(hodCse);
+
+                User faculty = User.builder()
+                                .name("Faculty Member")
+                                .email("faculty@ssit.edu.in")
+                                .passwordHash(passwordEncoder.encode("faculty123"))
+                                .role(User.Role.FACULTY)
+                                .department("CSE")
+                                .createdAt(LocalDateTime.now())
+                                .build();
+                userRepository.save(faculty);
+
+                User student = User.builder()
+                                .name("Student User")
+                                .email("student@ssit.edu.in")
+                                .passwordHash(passwordEncoder.encode("student123"))
+                                .role(User.Role.STUDENT)
+                                .department("CSE")
+                                .createdAt(LocalDateTime.now())
+                                .build();
+                userRepository.save(student);
 
                 // 2. Create Building
                 Building mainBlock = Building.builder()
@@ -68,50 +127,16 @@ public class DataSeeder implements CommandLineRunner {
                                 .build();
                 roomRepository.save(csaLab);
 
-                // 4. Create Graph Nodes
+                // 4. Create Graph Nodes (Basic)
                 GraphNode entryNode = GraphNode.builder()
                                 .buildingId(mainBlock.getId())
                                 .label("Main Entrance")
                                 .type(GraphNode.NodeType.ENTRY_EXIT)
-                                .coordinates(Arrays.asList(13.34, 77.12)) // Dummy coords
+                                .coordinates(Arrays.asList(13.34, 77.12))
                                 .build();
                 entryNode = nodeRepository.save(entryNode);
 
-                GraphNode corridorNode = GraphNode.builder()
-                                .buildingId(mainBlock.getId())
-                                .label("Corridor 1")
-                                .type(GraphNode.NodeType.CORRIDOR)
-                                .coordinates(Arrays.asList(13.3401, 77.1201))
-                                .build();
-                corridorNode = nodeRepository.save(corridorNode);
-
-                GraphNode labNode = GraphNode.builder()
-                                .buildingId(mainBlock.getId())
-                                .roomId(csaLab.getId())
-                                .label("CSA Lab Door")
-                                .type(GraphNode.NodeType.ROOM)
-                                .coordinates(Arrays.asList(13.3402, 77.1202))
-                                .build();
-                labNode = nodeRepository.save(labNode);
-
-                // 5. Create Edges
-                GraphEdge edge1 = GraphEdge.builder()
-                                .fromNodeId(entryNode.getId())
-                                .toNodeId(corridorNode.getId())
-                                .weight(10.0)
-                                .isBidirectional(true)
-                                .build();
-                edgeRepository.save(edge1);
-
-                GraphEdge edge2 = GraphEdge.builder()
-                                .fromNodeId(corridorNode.getId())
-                                .toNodeId(labNode.getId())
-                                .weight(5.0)
-                                .isBidirectional(true)
-                                .build();
-                edgeRepository.save(edge2);
-
-                // 6. Create Event
+                // 5. Create Event
                 Event techTalk = Event.builder()
                                 .title("Future of AI")
                                 .description("A talk by industry experts")
@@ -120,10 +145,11 @@ public class DataSeeder implements CommandLineRunner {
                                 .startTime(LocalDateTime.now().plusDays(1))
                                 .endTime(LocalDateTime.now().plusDays(1).plusHours(2))
                                 .organizer("CSA Dept")
-                                .createdByUserId(admin.getId())
+                                .createdByUserId(cultural.getId())
+                                .eventType(Event.EventType.TECHNICAL)
                                 .build();
                 eventRepository.save(techTalk);
 
-                System.out.println("--- SAMPLE DATA SEEDED ---");
+                System.out.println("--- SAMPLE DATA SEEDED with 7 ROLES ---");
         }
 }

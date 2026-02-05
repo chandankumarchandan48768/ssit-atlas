@@ -3,6 +3,7 @@ package com.ssit.atlas.service;
 import com.ssit.atlas.dto.AuthRequest;
 import com.ssit.atlas.dto.AuthResponse;
 import com.ssit.atlas.dto.RegisterRequest;
+import com.ssit.atlas.dto.UserResponse;
 import com.ssit.atlas.model.User;
 import com.ssit.atlas.repository.UserRepository;
 import com.ssit.atlas.security.JwtUtils;
@@ -35,6 +36,8 @@ public class AuthService {
                                 .email(request.getEmail())
                                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                                 .role(request.getRole() != null ? request.getRole() : User.Role.STUDENT)
+                                .department(request.getDepartment())
+                                .phoneNumber(request.getPhoneNumber())
                                 .createdAt(LocalDateTime.now())
                                 .build();
 
@@ -70,5 +73,11 @@ public class AuthService {
 
                 var jwtToken = jwtUtils.generateToken(userDetails);
                 return AuthResponse.builder().token(jwtToken).build();
+        }
+
+        public UserResponse getCurrentUser(String email) {
+                User user = userRepository.findByEmail(email)
+                                .orElseThrow(() -> new RuntimeException("User not found"));
+                return new UserResponse(user);
         }
 }

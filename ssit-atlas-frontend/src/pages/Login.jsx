@@ -18,7 +18,7 @@ const Login = () => {
             // or if it's the raw token. DTO usually has fields.
             // I'll assume `token` or `accessToken`.
             const token = response.data.accessToken || response.data.token;
-            localStorage.setItem('token', token);
+            sessionStorage.setItem('token', token);
             navigate('/');
             window.location.reload(); // Quick way to update navbar state
         } catch (err) {

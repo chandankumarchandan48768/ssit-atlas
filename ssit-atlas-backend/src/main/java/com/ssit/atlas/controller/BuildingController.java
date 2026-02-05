@@ -31,8 +31,24 @@ public class BuildingController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGEMENT_TEAM', 'ADMIN')")
     public ResponseEntity<Building> createBuilding(@RequestBody Building building) {
         return ResponseEntity.ok(buildingService.createBuilding(building));
+    }
+
+    // Add update and delete if missing in service, but assuming standard operations
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('MANAGEMENT_TEAM', 'ADMIN')")
+    public ResponseEntity<Building> updateBuilding(@PathVariable String id, @RequestBody Building building) {
+        // Assuming service has update method, if not I might need to add it.
+        // Checking BuildingService...
+        return ResponseEntity.ok(buildingService.updateBuilding(id, building));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteBuilding(@PathVariable String id) {
+        buildingService.deleteBuilding(id);
+        return ResponseEntity.noContent().build();
     }
 }

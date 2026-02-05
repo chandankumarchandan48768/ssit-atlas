@@ -19,6 +19,10 @@ public class EventService {
         return eventRepository.findAll();
     }
 
+    public List<Event> getUpcomingEvents() {
+        return eventRepository.findByStartTimeAfter(java.time.LocalDateTime.now());
+    }
+
     public Optional<Event> getEventById(String id) {
         return eventRepository.findById(id);
     }

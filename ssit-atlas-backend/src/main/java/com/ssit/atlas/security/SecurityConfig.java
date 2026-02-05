@@ -6,6 +6,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -17,10 +18,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.http.HttpMethod;
 import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
@@ -38,10 +41,14 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/events/**").permitAll() // Allow viewing events without login if desired,
-                                                                       // or keep mapped.
-                        // Actually, let's keep it consistent with the controller.
-                        // But for now, just enable CORS.
+                        .requestMatchers(HttpMethod.GET, "/api/events/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/notices/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/placements/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/buildings/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/achievements/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/rooms/**").permitAll()
+                        .requestMatchers("/api/navigation/**").permitAll() // GET nodes/edges, POST route
+                        .requestMatchers(HttpMethod.GET, "/api/lost-found/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -14,6 +14,8 @@ public class LostItem {
     private String description;
     private String imageUrl;
     private String lastSeenNodeId;
+    private String location;
+    private String contactInfo;
     private ItemStatus status;
     private String postedByUserId;
 
@@ -28,12 +30,15 @@ public class LostItem {
     }
 
     public LostItem(String id, String title, String description, String imageUrl, String lastSeenNodeId,
+            String location, String contactInfo,
             ItemStatus status, String postedByUserId, LocalDateTime createdAt) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.imageUrl = imageUrl;
         this.lastSeenNodeId = lastSeenNodeId;
+        this.location = location;
+        this.contactInfo = contactInfo;
         this.status = status;
         this.postedByUserId = postedByUserId;
         this.createdAt = createdAt;
@@ -79,6 +84,22 @@ public class LostItem {
         this.lastSeenNodeId = lastSeenNodeId;
     }
 
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public String getContactInfo() {
+        return contactInfo;
+    }
+
+    public void setContactInfo(String contactInfo) {
+        this.contactInfo = contactInfo;
+    }
+
     public ItemStatus getStatus() {
         return status;
     }
@@ -113,6 +134,8 @@ public class LostItem {
         private String description;
         private String imageUrl;
         private String lastSeenNodeId;
+        private String location;
+        private String contactInfo;
         private ItemStatus status;
         private String postedByUserId;
         private LocalDateTime createdAt;
@@ -145,6 +168,16 @@ public class LostItem {
             return this;
         }
 
+        public LostItemBuilder location(String location) {
+            this.location = location;
+            return this;
+        }
+
+        public LostItemBuilder contactInfo(String contactInfo) {
+            this.contactInfo = contactInfo;
+            return this;
+        }
+
         public LostItemBuilder status(ItemStatus status) {
             this.status = status;
             return this;
@@ -161,7 +194,8 @@ public class LostItem {
         }
 
         public LostItem build() {
-            return new LostItem(id, title, description, imageUrl, lastSeenNodeId, status, postedByUserId, createdAt);
+            return new LostItem(id, title, description, imageUrl, lastSeenNodeId, location, contactInfo, status,
+                    postedByUserId, createdAt);
         }
     }
 }

@@ -22,11 +22,28 @@ public class Event {
     private List<String> tags;
     private String createdByUserId;
 
+    private String brochureUrl;
+    private String posterUrl;
+    private Integer capacity;
+    private List<String> registeredUserIds;
+    private EventType eventType;
+    private boolean registrationRequired;
+    private LocalDateTime registrationDeadline;
+    private String contactEmail;
+    private String contactPhone;
+
+    public enum EventType {
+        CULTURAL, TECHNICAL, SPORTS, WORKSHOP, SEMINAR, OTHER
+    }
+
     public Event() {
     }
 
     public Event(String id, String title, String description, String buildingId, String roomId, LocalDateTime startTime,
-            LocalDateTime endTime, String organizer, List<String> tags, String createdByUserId) {
+            LocalDateTime endTime, String organizer, List<String> tags, String createdByUserId, String brochureUrl,
+            String posterUrl, Integer capacity, List<String> registeredUserIds, EventType eventType,
+            boolean registrationRequired, LocalDateTime registrationDeadline, String contactEmail,
+            String contactPhone) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -37,6 +54,15 @@ public class Event {
         this.organizer = organizer;
         this.tags = tags;
         this.createdByUserId = createdByUserId;
+        this.brochureUrl = brochureUrl;
+        this.posterUrl = posterUrl;
+        this.capacity = capacity;
+        this.registeredUserIds = registeredUserIds;
+        this.eventType = eventType;
+        this.registrationRequired = registrationRequired;
+        this.registrationDeadline = registrationDeadline;
+        this.contactEmail = contactEmail;
+        this.contactPhone = contactPhone;
     }
 
     public String getId() {
@@ -119,6 +145,78 @@ public class Event {
         this.createdByUserId = createdByUserId;
     }
 
+    public String getBrochureUrl() {
+        return brochureUrl;
+    }
+
+    public void setBrochureUrl(String brochureUrl) {
+        this.brochureUrl = brochureUrl;
+    }
+
+    public String getPosterUrl() {
+        return posterUrl;
+    }
+
+    public void setPosterUrl(String posterUrl) {
+        this.posterUrl = posterUrl;
+    }
+
+    public Integer getCapacity() {
+        return capacity;
+    }
+
+    public void setCapacity(Integer capacity) {
+        this.capacity = capacity;
+    }
+
+    public List<String> getRegisteredUserIds() {
+        return registeredUserIds;
+    }
+
+    public void setRegisteredUserIds(List<String> registeredUserIds) {
+        this.registeredUserIds = registeredUserIds;
+    }
+
+    public EventType getEventType() {
+        return eventType;
+    }
+
+    public void setEventType(EventType eventType) {
+        this.eventType = eventType;
+    }
+
+    public boolean isRegistrationRequired() {
+        return registrationRequired;
+    }
+
+    public void setRegistrationRequired(boolean registrationRequired) {
+        this.registrationRequired = registrationRequired;
+    }
+
+    public LocalDateTime getRegistrationDeadline() {
+        return registrationDeadline;
+    }
+
+    public void setRegistrationDeadline(LocalDateTime registrationDeadline) {
+        this.registrationDeadline = registrationDeadline;
+    }
+
+    public String getContactEmail() {
+        return contactEmail;
+    }
+
+    public void setContactEmail(String contactEmail) {
+        this.contactEmail = contactEmail;
+    }
+
+    public String getContactPhone() {
+        return contactPhone;
+    }
+
+    public void setContactPhone(String contactPhone) {
+        this.contactPhone = contactPhone;
+    }
+
     public static EventBuilder builder() {
         return new EventBuilder();
     }
@@ -134,6 +232,15 @@ public class Event {
         private String organizer;
         private List<String> tags;
         private String createdByUserId;
+        private String brochureUrl;
+        private String posterUrl;
+        private Integer capacity;
+        private List<String> registeredUserIds;
+        private EventType eventType;
+        private boolean registrationRequired;
+        private LocalDateTime registrationDeadline;
+        private String contactEmail;
+        private String contactPhone;
 
         EventBuilder() {
         }
@@ -188,9 +295,55 @@ public class Event {
             return this;
         }
 
+        public EventBuilder brochureUrl(String brochureUrl) {
+            this.brochureUrl = brochureUrl;
+            return this;
+        }
+
+        public EventBuilder posterUrl(String posterUrl) {
+            this.posterUrl = posterUrl;
+            return this;
+        }
+
+        public EventBuilder capacity(Integer capacity) {
+            this.capacity = capacity;
+            return this;
+        }
+
+        public EventBuilder registeredUserIds(List<String> registeredUserIds) {
+            this.registeredUserIds = registeredUserIds;
+            return this;
+        }
+
+        public EventBuilder eventType(EventType eventType) {
+            this.eventType = eventType;
+            return this;
+        }
+
+        public EventBuilder registrationRequired(boolean registrationRequired) {
+            this.registrationRequired = registrationRequired;
+            return this;
+        }
+
+        public EventBuilder registrationDeadline(LocalDateTime registrationDeadline) {
+            this.registrationDeadline = registrationDeadline;
+            return this;
+        }
+
+        public EventBuilder contactEmail(String contactEmail) {
+            this.contactEmail = contactEmail;
+            return this;
+        }
+
+        public EventBuilder contactPhone(String contactPhone) {
+            this.contactPhone = contactPhone;
+            return this;
+        }
+
         public Event build() {
             return new Event(id, title, description, buildingId, roomId, startTime, endTime, organizer, tags,
-                    createdByUserId);
+                    createdByUserId, brochureUrl, posterUrl, capacity, registeredUserIds, eventType,
+                    registrationRequired, registrationDeadline, contactEmail, contactPhone);
         }
     }
 }

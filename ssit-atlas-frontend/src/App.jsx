@@ -5,6 +5,12 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import MapPage from './pages/MapPage';
 import EventsPage from './pages/EventsPage';
+import Dashboard from './pages/Dashboard';
+import LostAndFoundPage from './pages/LostAndFoundPage';
+import UserManagementPage from './pages/UserManagementPage';
+import AuditLogsPage from './pages/AuditLogsPage';
+
+
 
 function App() {
   return (
@@ -15,9 +21,14 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/map" element={<MapPage />} />
           <Route path="/events" element={<EventsPage />} />
+          <Route path="/lost-found" element={<LostAndFoundPage />} />
+          <Route path="/admin/users" element={<UserManagementPage />} />
+          <Route path="/admin/logs" element={<AuditLogsPage />} />
         </Routes>
+
       </main>
     </div>
   );

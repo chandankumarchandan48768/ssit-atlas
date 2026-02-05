@@ -2,10 +2,10 @@ import { Link, useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
     const navigate = useNavigate();
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
         navigate('/login');
     };
 
@@ -32,6 +32,15 @@ const Navbar = () => {
                         <li>
                             <Link to="/events" className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Events</Link>
                         </li>
+                        <li>
+                            <Link to="/lost-found" className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Lost & Found</Link>
+                        </li>
+
+                        {token ? (
+                            <li>
+                                <Link to="/dashboard" className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Dashboard</Link>
+                            </li>
+                        ) : null}
                         {token ? (
                             <li>
                                 <button onClick={handleLogout} className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Logout</button>

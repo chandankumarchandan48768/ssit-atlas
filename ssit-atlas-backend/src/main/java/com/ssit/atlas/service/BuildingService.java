@@ -26,4 +26,21 @@ public class BuildingService {
     public Building createBuilding(Building building) {
         return buildingRepository.save(building);
     }
+
+    public Building updateBuilding(String id, Building buildingDetails) {
+        return buildingRepository.findById(id).map(building -> {
+            building.setName(buildingDetails.getName());
+            building.setCode(buildingDetails.getCode());
+            building.setDescription(buildingDetails.getDescription());
+            building.setCenter(buildingDetails.getCenter());
+            building.setPolygon(buildingDetails.getPolygon());
+            building.setFloors(buildingDetails.getFloors());
+            building.setMetadata(buildingDetails.getMetadata());
+            return buildingRepository.save(building);
+        }).orElseThrow(() -> new RuntimeException("Building not found"));
+    }
+
+    public void deleteBuilding(String id) {
+        buildingRepository.deleteById(id);
+    }
 }

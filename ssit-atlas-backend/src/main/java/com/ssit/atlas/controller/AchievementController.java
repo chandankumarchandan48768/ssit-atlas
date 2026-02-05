@@ -32,7 +32,7 @@ public class AchievementController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'FACULTY')")
+    @PreAuthorize("hasAnyRole('HOD', 'FACULTY', 'ADMIN')")
     public ResponseEntity<Achievement> createAchievement(@RequestBody Achievement achievement) {
         return ResponseEntity.ok(achievementService.createAchievement(achievement));
     }

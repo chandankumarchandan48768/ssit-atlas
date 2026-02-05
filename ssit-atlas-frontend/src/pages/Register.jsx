@@ -7,13 +7,15 @@ const Register = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [role, setRole] = useState('STUDENT');
+    const [department, setDepartment] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await api.post('/auth/register', { name, email, password, role });
+            await api.post('/auth/register', { name, email, password, role, department, phoneNumber });
             navigate('/login');
         } catch (err) {
             console.error(err);
@@ -58,6 +60,35 @@ const Register = () => {
                                 />
                             </div>
                             <div>
+                                <label htmlFor="phone" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Phone Number</label>
+                                <input
+                                    type="tel"
+                                    name="phone"
+                                    id="phone"
+                                    className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                    placeholder="9876543210"
+                                    value={phoneNumber}
+                                    onChange={(e) => setPhoneNumber(e.target.value)}
+                                />
+                            </div>
+                            <div>
+                                <label htmlFor="department" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Department (Optional)</label>
+                                <select
+                                    id="department"
+                                    className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                    value={department}
+                                    onChange={(e) => setDepartment(e.target.value)}
+                                >
+                                    <option value="">Select Department</option>
+                                    <option value="CSE">CSE</option>
+                                    <option value="ISE">ISE</option>
+                                    <option value="ECE">ECE</option>
+                                    <option value="EEE">EEE</option>
+                                    <option value="MECH">MECH</option>
+                                    <option value="CIVIL">CIVIL</option>
+                                </select>
+                            </div>
+                            <div>
                                 <label htmlFor="role" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Role</label>
                                 <select
                                     id="role"
@@ -67,6 +98,10 @@ const Register = () => {
                                 >
                                     <option value="STUDENT">Student</option>
                                     <option value="FACULTY">Faculty</option>
+                                    <option value="HOD">HOD</option>
+                                    <option value="CULTURAL_COMMITTEE">Cultural Committee</option>
+                                    <option value="MANAGEMENT_TEAM">Management Team</option>
+                                    <option value="PLACEMENT_DEPARTMENT">Placement Department</option>
                                     <option value="ADMIN">Admin</option>
                                 </select>
                             </div>
