@@ -14,12 +14,30 @@ const Register = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError('');
+        
+        if (!name.trim() || !email.trim() || !password.trim()) {
+            setError('Please fill in all required fields');
+            return;
+        }
+
+        if (password.length < 6) {
+            setError('Password must be at least 6 characters long');
+            return;
+        }
+
         try {
             await api.post('/auth/register', { name, email, password, role, department, phoneNumber });
             navigate('/login');
         } catch (err) {
-            console.error(err);
-            setError('Registration failed. Please try again.');
+            console.error('Registration error:', err);
+            if (err.response?.data?.message) {
+                setError(err.response.data.message);
+            } else if (err.response?.status === 409) {
+                setError('Email already registered');
+            } else {
+                setError('Registration failed. Please try again.');
+            }
         }
     };
 

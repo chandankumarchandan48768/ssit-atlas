@@ -4,10 +4,14 @@ import com.ssit.atlas.dto.AuthRequest;
 import com.ssit.atlas.dto.AuthResponse;
 import com.ssit.atlas.dto.RegisterRequest;
 import com.ssit.atlas.dto.UserResponse;
+import com.ssit.atlas.exception.AuthenticationFailedException;
+import com.ssit.atlas.exception.ResourceAlreadyExistsException;
 import com.ssit.atlas.model.User;
 import com.ssit.atlas.repository.UserRepository;
+import com.ssit.atlas.security.CustomUserDetailsService;
 import com.ssit.atlas.security.JwtUtils;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,16 +25,22 @@ public class AuthService {
         private final PasswordEncoder passwordEncoder;
         private final JwtUtils jwtUtils;
         private final AuthenticationManager authenticationManager;
+        private final CustomUserDetailsService userDetailsService;
 
         public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtils jwtUtils,
-                        AuthenticationManager authenticationManager) {
+                        AuthenticationManager authenticationManager, CustomUserDetailsService userDetailsService) {
                 this.userRepository = userRepository;
                 this.passwordEncoder = passwordEncoder;
                 this.jwtUtils = jwtUtils;
                 this.authenticationManager = authenticationManager;
+                this.userDetailsService = userDetailsService;
         }
 
         public AuthResponse register(RegisterRequest request) {
+                if (userRepository.existsByEmail(request.getEmail())) {
+                        throw new ResourceAlreadyExistsException("Email already registered");
+                }
+
                 var user = User.builder()
                                 .name(request.getName())
                                 .email(request.getEmail())
@@ -41,42 +51,35 @@ public class AuthService {
                                 .createdAt(LocalDateTime.now())
                                 .build();
 
-                userRepository.save(user); // Ideally handle email uniqueness exception here
+                userRepository.save(user);
 
-                // For security, maybe don't return token immediately, but for this task we can
-                // Or just let them login. But standard is often return token.
-                // Let's create a UserDetails equivalent or just simple:
-
-                var userDetails = org.springframework.security.core.userdetails.User
-                                .withUsername(user.getEmail())
-                                .password(user.getPasswordHash())
-                                .roles(user.getRole().name())
-                                .build();
-
+                var userDetails = userDetailsService.loadUserById(user.getId());
                 var jwtToken = jwtUtils.generateToken(userDetails);
                 return AuthResponse.builder().token(jwtToken).build();
         }
 
         public AuthResponse authenticate(AuthRequest request) {
-                authenticationManager.authenticate(
-                                new UsernamePasswordAuthenticationToken(
-                                                request.getEmail(),
-                                                request.getPassword()));
+                try {
+                        authenticationManager.authenticate(
+                                        new UsernamePasswordAuthenticationToken(
+                                                        request.getEmail(),
+                                                        request.getPassword()));
+                } catch (BadCredentialsException e) {
+                        throw new AuthenticationFailedException("Invalid email or password");
+                } catch (Exception e) {
+                        throw new AuthenticationFailedException("Authentication failed: " + e.getMessage());
+                }
+
                 var user = userRepository.findByEmail(request.getEmail())
-                                .orElseThrow();
+                                .orElseThrow(() -> new AuthenticationFailedException("User not found"));
 
-                var userDetails = org.springframework.security.core.userdetails.User
-                                .withUsername(user.getEmail())
-                                .password(user.getPasswordHash())
-                                .roles(user.getRole().name())
-                                .build();
-
+                var userDetails = userDetailsService.loadUserById(user.getId());
                 var jwtToken = jwtUtils.generateToken(userDetails);
                 return AuthResponse.builder().token(jwtToken).build();
         }
 
-        public UserResponse getCurrentUser(String email) {
-                User user = userRepository.findByEmail(email)
+        public UserResponse getCurrentUser(String userId) {
+                User user = userRepository.findById(userId)
                                 .orElseThrow(() -> new RuntimeException("User not found"));
                 return new UserResponse(user);
         }

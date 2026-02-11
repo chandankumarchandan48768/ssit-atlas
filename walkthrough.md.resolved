@@ -1,0 +1,240 @@
+# WebSocket Message Service Fix & Live Chat Implementation - Walkthrough
+
+## Summary
+
+Fixed critical WebSocket authentication issues and implemented comprehensive real-time chat features including:
+- ✅ WebSocket JWT authentication
+- ✅ Real-time online/offline presence tracking
+- ✅ Live chat with delivery confirmations
+- ✅ Typing indicators
+- ✅ Automatic heartbeat mechanism
+- ✅ Friend presence broadcasting
+
+---
+
+## Changes Made
+
+### Backend - Authentication & Configuration
+
+#### [NEW] [WebSocketAuthInterceptor.java](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-backend/src/main/java/com/ssit/atlas/config/WebSocketAuthInterceptor.java)
+- Extracts JWT token from WebSocket connection headers
+- Sets authenticated user Principal in WebSocket session
+- Enables proper user identification for all STOMP messages
+
+#### [NEW] [WebSocketEventListener.java](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-backend/src/main/java/com/ssit/atlas/config/WebSocketEventListener.java)
+- Listens for user connect/disconnect events
+- Automatically marks users online/offline
+- Broadcasts presence updates to all friends in real-time
+
+#### [MODIFIED] [WebSocketConfig.java](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-backend/src/main/java/com/ssit/atlas/config/WebSocketConfig.java)
+- Registered authentication interceptor
+- Configured client inbound channel for JWT processing
+
+---
+
+### Backend - Presence & Messaging
+
+#### [NEW] [PresenceWebSocketController.java](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-backend/src/main/java/com/ssit/atlas/controller/PresenceWebSocketController.java)
+- `/app/presence.heartbeat` - Keeps connection alive and updates presence
+- `/app/presence.getFriends` - Retrieves current online status of all friends
+
+#### [MODIFIED] [ChatWebSocketController.java](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-backend/src/main/java/com/ssit/atlas/controller/ChatWebSocketController.java)
+- Added null checks for Principal (authentication validation)
+- Implemented delivery confirmations via `/user/queue/message-ack`
+- Added error handling with `/user /queue/message-error`
+- Improved typing indicator handling
+
+#### [MODIFIED] [FriendService.java](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-backend/src/main/java/com/ssit/atlas/service/FriendService.java)
+- Made [getFriendIds()](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-backend/src/main/java/com/ssit/atlas/service/FriendService.java#194-200) public for presence broadcasting
+
+---
+
+### Frontend - WebSocket Client & UI
+
+#### [MODIFIED] [websocketClient.js](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-frontend/src/utils/websocketClient.js)
+**New Features:**
+- [subscribeToPresence()](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-frontend/src/utils/websocketClient.js#114-136) - Auto-subscribes to presence updates on connect
+- [onPresenceUpdate(callback)](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-frontend/src/utils/websocketClient.js#137-140) - Registers callbacks for presence changes
+- [startHeartbeat()](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-frontend/src/utils/websocketClient.js#141-149) - Sends heartbeat every 30 seconds
+- [stopHeartbeat()](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-frontend/src/utils/websocketClient.js#150-156) - Cleanup on disconnect
+
+**New Subscriptions:**
+- `/user/queue/presence` - Individual friend presence updates
+- `/user/queue/friends-presence` - Bulk friend presence data
+
+#### [MODIFIED] [ChatWindow.jsx](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-frontend/src/components/social/ChatWindow.jsx)
+**New Features:**
+- Real-time online/offline status display (updates dynamically)
+- Message delivery acknowledgment handling
+- Error notification for failed messages
+- Presence update subscription
+
+**New Subscriptions:**
+- `/user/queue/message-ack` - Message delivery confirmations
+- `/user/queue/message-error` - Message error notifications
+
+---
+
+## How It Works
+
+### 1. WebSocket Connection Flow
+```
+User logs in → Frontend connects to /ws endpoint with JWT token
+       ↓
+WebSocketAuthInterceptor extracts token and sets Principal
+       ↓
+WebSocketEventListener detects connection → Marks user ONLINE
+       ↓
+Broadcasts presence to all friends → Friends see user online
+       ↓
+Heartbeat starts (every 30 seconds) to maintain connection
+```
+
+### 2. Message Delivery Flow
+```
+User types message → Frontend sends to /app/chat.send
+       ↓
+ChatWebSocketController validates sender (Principal)
+       ↓
+Saves to database via ChatService
+       ↓
+Sends to receiver /user/{receiverId}/queue/messages
+       ↓
+Sends acknowledgment to sender /user/{senderId}/queue/message-ack
+       ↓
+Both users receive message in real-time
+```
+
+### 3. Presence Tracking Flow
+```
+User A connects → Marked ONLINE → Friends notified
+       ↓
+User B (friend) receives presence update → UI shows A as online
+       ↓
+User A sends heartbeat every 30s → Keeps status fresh
+       ↓
+User A disconnects → Marked OFFLINE → Friends notified
+       ↓
+User B receives update → UI shows A as offline
+```
+
+---
+
+## WebSocket Endpoints
+
+### Client → Server (Sending)
+- `/app/chat.send` - Send chat message
+- `/app/chat.typing` - Send typing indicator
+- `/app/presence.heartbeat` - Send heartbeat
+- `/app/presence.getFriends` - Request friends' presence
+
+### Server → Client (Receiving)
+- `/user/queue/messages` - Receive chat messages
+- `/user/queue/typing` - Receive typing indicators
+- `/user/queue/message-ack` - Receive delivery confirmations
+- `/user/queue/message-error` - Receive error notifications
+- `/user/queue /presence` - Receive individual friend presence updates
+- `/user/queue/friends-presence` - Receive bulk friend presence data
+
+---
+
+## Testing Instructions
+
+### Prerequisites
+1. MongoDB running on localhost:27017
+2. At least two user accounts registered
+3. Users added as friends
+
+### Backend Testing
+```bash
+cd ssit-atlas-backend
+./mvnw spring-boot:run
+```
+
+**Expected Console Output:**
+- ✅ WebSocket endpoint registered at `/ws`
+- ✅ No authentication errors
+- ✅ "User connected: {userId}" when users log in
+- ✅ "User disconnected: {userId}" when users log out
+
+### Frontend Testing
+
+1. **Start Frontend**
+   ```bash
+   cd ssit-atlas-frontend
+   npm run dev
+   ```
+
+2. **Two-User Test**
+   - Open two browser windows (or incognito mode)
+   - Login as User A in Window 1
+   - Login as User B in Window 2
+   - Navigate to Social/Friends section in both
+
+3. **Verify Online/Offline Status**
+   - ✅ User A should see User B as "online" with green indicator
+   - ✅ User B should see User A as "online" with green indicator
+   - ✅ Close Window 2 → User A should see User B go "offline"
+   - ✅ Reopen Window 2 → User A should see User B come back "online"
+
+4. **Verify Live Chat**
+   - Click on friend name to open chat
+   - Type message in User A window
+   - ✅ Message appears in User B window instantly
+   - ✅ Typing indicator shows "User is typing..."
+   - ✅ Messages persist after refresh
+
+5. **Verify Error Handling**
+   - Stop backend server
+   - Try sending message from User A
+   - ✅ Error notification appears
+   - ✅ Restart backend → automatically reconnects
+
+### Browser Console Checks
+Open browser console (F12) and verify:
+- ✅ "STOMP Debug: CONNECTED"
+- ✅ "WebSocket Connected"
+- ✅ "Presence update: {userId: ..., online: true}"
+- ✅ No authentication errors
+- ✅ No "Principal is null" errors
+
+---
+
+## Troubleshooting
+
+### Issue: "Principal is null" in console
+**Solution:** Ensure JWT token is being sent in WebSocket connection headers. Check that user is logged in and token is valid.
+
+### Issue: Messages not delivered
+**Solution:** Check that users are friends. Only friends can exchange messages (enforced by `ChatService.sendMessage`).
+
+### Issue: Online status not updating
+**Solution:** Verify heartbeat is running (check browser console for heartbeat logs every 30s). Ensure [WebSocketEventListener](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-backend/src/main/java/com/ssit/atlas/config/WebSocketEventListener.java#16-89) is registered.
+
+### Issue: Frontend doesn't reconnect after backend restart
+**Solution:** STOMP client has 5-second reconnect delay. Wait a few seconds, or refresh the page.
+
+---
+
+## Summary of Fixes
+
+| Issue | Root Cause | Solution |
+|-------|-----------|----------|
+| Messages not delivered | Principal was null, user not authenticated | Created [WebSocketAuthInterceptor](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-backend/src/main/java/com/ssit/atlas/config/WebSocketAuthInterceptor.java#16-56) to extract JWT from connection |
+| No online/offline status | No connection tracking | Created [WebSocketEventListener](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-backend/src/main/java/com/ssit/atlas/config/WebSocketEventListener.java#16-89) for connect/disconnect events |
+| Status not broadcasted | No friends notification mechanism | Added presence broadcasting to friends on connect/disconnect |
+| Connection drops | No heartbeat | Implemented 30-second heartbeat via [PresenceWebSocketController](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-backend/src/main/java/com/ssit/atlas/controller/PresenceWebSocketController.java#15-62) |
+| No delivery confirmation | Fire-and-forget messaging | Added acknowledgment queue `/user/queue/message-ack` |
+
+---
+
+## What's Working Now
+
+✅ **Authentication** - WebSocket connections properly authenticated via JWT  
+✅ **Live Chat** - Real-time message delivery with typing indicators  
+✅ **Presence Tracking** - Automatic online/offline detection and broadcasting  
+✅ **Heartbeat** - Connection kept alive with automatic presence updates  
+✅ **Error Handling** - Failed messages reported to sender  
+✅ **Friend Notifications** - Friends instantly notified when users come online/offline  
+
+The messaging service is now fully functional with complete real-time capabilities! 🎉

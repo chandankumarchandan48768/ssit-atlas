@@ -21,10 +21,32 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
+        return buildUserDetails(user);
+    }
+
+    public UserDetails loadUserById(String userId) throws UsernameNotFoundException {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with ID: " + userId));
+
+        return buildUserDetails(user);
+    }
+
+    private UserDetails buildUserDetails(User user) {
+        // Handle null or invalid role
+        User.Role role = user.getRole();
+        if (role == null) {
+            role = User.Role.STUDENT;
+            user.setRole(role);
+            userRepository.save(user);
+        }
+
+        // Use user ID as the username/principal to maintain consistency with friend service
         return org.springframework.security.core.userdetails.User
-                .withUsername(user.getEmail())
+                .withUsername(user.getId())
                 .password(user.getPasswordHash())
-                .roles(user.getRole().name())
+                .roles(role.name())
                 .build();
     }
 }
+
+

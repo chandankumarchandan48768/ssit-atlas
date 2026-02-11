@@ -10,20 +10,36 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError('');
+
+        if (!email.trim() || !password.trim()) {
+            setError('Please enter email and password');
+            return;
+        }
+
         try {
             const response = await api.post('/auth/login', { email, password });
-            // Depending on AuthResponse, it might be response.data.accessToken or similar.
-            // Assuming AuthResponse matches what the backend generally sends (token string or object with token)
-            // Based on controller, it returns AuthResponse. Let's assume it has an access_token or token field, 
-            // or if it's the raw token. DTO usually has fields.
-            // I'll assume `token` or `accessToken`.
-            const token = response.data.accessToken || response.data.token;
+            const token = response.data.token || response.data.accessToken;
+            
+            if (!token) {
+                setError('No token received from server');
+                return;
+            }
+
             sessionStorage.setItem('token', token);
             navigate('/');
-            window.location.reload(); // Quick way to update navbar state
+            window.location.reload();
         } catch (err) {
-            console.error(err);
-            setError('Invalid email or password');
+            console.error('Login error:', err);
+            if (err.response?.data?.message) {
+                setError(err.response.data.message);
+            } else if (err.response?.status === 401) {
+                setError('Invalid email or password');
+            } else if (err.message === 'Network Error') {
+                setError('Cannot connect to server. Make sure the backend is running.');
+            } else {
+                setError('Login failed. Please try again.');
+            }
         }
     };
 

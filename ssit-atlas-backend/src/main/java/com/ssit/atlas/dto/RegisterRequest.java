@@ -1,11 +1,14 @@
 package com.ssit.atlas.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.ssit.atlas.config.RoleDeserializer;
 import com.ssit.atlas.model.User;
 
 public class RegisterRequest {
     private String name;
     private String email;
     private String password;
+    @JsonDeserialize(using = RoleDeserializer.class)
     private User.Role role;
     private String department;
     private String phoneNumber;

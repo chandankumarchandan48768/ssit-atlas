@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard';
 import LostAndFoundPage from './pages/LostAndFoundPage';
 import UserManagementPage from './pages/UserManagementPage';
 import AuditLogsPage from './pages/AuditLogsPage';
+import SocialPage from './pages/SocialPage';
 
 
 
@@ -25,6 +26,7 @@ function App() {
           <Route path="/map" element={<MapPage />} />
           <Route path="/events" element={<EventsPage />} />
           <Route path="/lost-found" element={<LostAndFoundPage />} />
+          <Route path="/social" element={<SocialPage />} />
           <Route path="/admin/users" element={<UserManagementPage />} />
           <Route path="/admin/logs" element={<AuditLogsPage />} />
         </Routes>
