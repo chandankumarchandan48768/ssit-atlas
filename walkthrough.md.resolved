@@ -45,7 +45,7 @@ Fixed critical WebSocket authentication issues and implemented comprehensive rea
 - Improved typing indicator handling
 
 #### [MODIFIED] [FriendService.java](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-backend/src/main/java/com/ssit/atlas/service/FriendService.java)
-- Made [getFriendIds()](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-backend/src/main/java/com/ssit/atlas/service/FriendService.java#194-200) public for presence broadcasting
+- Made [getFriendIds()](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-backend/src/main/java/com/ssit/atlas/service/FriendService.java#196-202) public for presence broadcasting
 
 ---
 
@@ -238,3 +238,116 @@ Open browser console (F12) and verify:
 ✅ **Friend Notifications** - Friends instantly notified when users come online/offline  
 
 The messaging service is now fully functional with complete real-time capabilities! 🎉
+
+---
+
+## User Search Functionality Fix
+
+### Issue Discovery
+After implementing WebSocket features, user search functionality was failing with a `500 Internal Server Error`.
+
+**Error Message:**
+```
+No enum constant com.ssit.atlas.model.User.Role.user
+```
+
+### Root Cause
+The MongoDB database contained users with lowercase role values (e.g., `"user"`, `"admin"`), but the Java `User.Role` enum only recognized uppercase constants (`STUDENT`, `ADMIN`, `FACULTY`, etc.). When the backend tried to retrieve all users for search via `userRepository.findAll()`, Spring Data MongoDB failed to deserialize users with invalid role values.
+
+### Solutions Implemented
+
+#### 1. Created UserDto for Safe Data Transfer
+**File:** [UserDto.java](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-backend/src/main/java/com/ssit/atlas/dto/UserDto.java)
+
+Created a Data Transfer Object to return only safe user information without exposing sensitive data like password hashes:
+
+```java
+public class UserDto {
+    private String id;
+    private String name;
+    private String email;
+    private String department;
+    private String profilePhotoUrl;
+    private User.Role role;
+    
+    public static UserDto fromUser(User user) {
+        return new UserDto(
+            user.getId(),
+            user.getName(),
+            user.getEmail(),
+            user.getDepartment(),
+            user.getProfilePhotoUrl(),
+            user.getRole()
+        );
+    }
+}
+```
+
+#### 2. Updated Search Endpoint
+**File:** [FriendService.java](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-backend/src/main/java/com/ssit/atlas/service/FriendService.java)
+
+Modified [searchUsers](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-backend/src/main/java/com/ssit/atlas/service/FriendService.java#151-163) method to return [UserDto](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-backend/src/main/java/com/ssit/atlas/dto/UserDto.java#5-85) instead of [User](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-backend/src/main/java/com/ssit/atlas/model/User.java#9-253):
+
+```java
+public List<UserDto> searchUsers(String query, String currentUserId) {
+    List<User> allUsers = userRepository.findAll();
+    List<String> friendIds = getFriendIds(currentUserId);
+
+    return allUsers.stream()
+            .filter(user -> !user.getId().equals(currentUserId))
+            .filter(user -> !friendIds.contains(user.getId()))
+            .filter(user -> user.getName().toLowerCase().contains(query.toLowerCase()) ||
+                    user.getEmail().toLowerCase().contains(query.toLowerCase()))
+            .map(UserDto::fromUser)
+            .collect(Collectors.toList());
+}
+```
+
+#### 3. Fixed Database Role Migration
+**File:** [RoleMigration.java](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-backend/src/main/java/com/ssit/atlas/config/RoleMigration.java)
+
+Rewrote the migration to fix role values directly in MongoDB **before** Spring Boot attempts to deserialize them into [User](file:///Users/chandankumar/Desktop/Final-project/ssit-atlas-backend/src/main/java/com/ssit/atlas/model/User.java#9-253) entities:
+
+```java
+@Override
+public void run(String... args) throws Exception {
+    // Fix lowercase roles to uppercase
+    String[][] roleMappings = {
+        { "user", "STUDENT" },  // Map legacy "user" role to STUDENT
+        { "admin", "ADMIN" },
+        { "student", "STUDENT" },
+        { "faculty", "FACULTY" },
+        // ... other mappings
+    };
+    
+    for (String[] mapping : roleMappings) {
+        Query query = new Query(Criteria.where("role").is(mapping[0]));
+        Update update = new Update().set("role", mapping[1]);
+        UpdateResult result = mongoTemplate.updateMulti(query, update, "users");
+    }
+}
+```
+
+### Verification
+
+**Migration Results:**
+```
+Starting role migration...
+Updated 1 users from role 'admin' to 'ADMIN'
+Updated 5 users from role 'user' to 'STUDENT'
+Role migration completed successfully. Total users updated: 6
+```
+
+**Browser Testing:**
+![User Search Results](/Users/chandankumar/.gemini/antigravity/brain/d5bfc245-1444-4b77-8a64-229ea10e258c/.system_generated/click_feedback/click_feedback_1770827124563.png)
+
+✅ **Confirmed Working:**
+- User search returns results successfully (200 OK)
+- Friend requests can be sent
+- No console errors
+- All functionality operational
+
+### Testing Video
+Complete testing walkthrough showing the fix in action:
+
+![User Search Testing](/Users/chandankumar/.gemini/antigravity/brain/d5bfc245-1444-4b77-8a64-229ea10e258c/verifying_search_fix_1770826884225.webp)
