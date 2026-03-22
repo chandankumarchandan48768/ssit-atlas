@@ -5,6 +5,7 @@ const api = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
+    timeout: 10000, // 10 second timeout
 });
 
 // Add a request interceptor to include the Token
@@ -17,6 +18,20 @@ api.interceptors.request.use(
         return config;
     },
     (error) => {
+        return Promise.reject(error);
+    }
+);
+
+// Add response interceptor to handle errors
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.code === 'ECONNABORTED') {
+            console.error('Request timeout - backend server may not be running');
+        }
+        if (error.message === 'Network Error' && !error.response) {
+            console.error('Cannot reach backend server. Make sure it\'s running on port 8080');
+        }
         return Promise.reject(error);
     }
 );

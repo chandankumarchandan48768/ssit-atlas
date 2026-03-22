@@ -1,13 +1,37 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 
 const AuditLogsPage = () => {
+    const navigate = useNavigate();
+    const [currentUser, setCurrentUser] = useState(null);
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [unauthorized, setUnauthorized] = useState(false);
 
     useEffect(() => {
-        fetchLogs();
-    }, []);
+        // Check if current user is ADMIN
+        const checkAdminAccess = async () => {
+            try {
+                const response = await api.get('/auth/me');
+                setCurrentUser(response.data);
+                
+                if (response.data.role !== 'ADMIN') {
+                    setUnauthorized(true);
+                    setTimeout(() => navigate('/dashboard'), 2000);
+                    return;
+                }
+                
+                fetchLogs();
+            } catch (error) {
+                console.error('Error checking admin access:', error);
+                setUnauthorized(true);
+                setTimeout(() => navigate('/login'), 2000);
+            }
+        };
+
+        checkAdminAccess();
+    }, [navigate]);
 
     const fetchLogs = async () => {
         try {
@@ -20,7 +44,21 @@ const AuditLogsPage = () => {
         }
     };
 
-    if (loading) return <div className="text-center mt-10">Loading logs...</div>;
+    if (unauthorized) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+                    <h2 className="text-xl font-bold text-red-600 mb-2">Access Denied</h2>
+                    <p className="text-gray-600 dark:text-gray-300 mb-4">Only administrators can access this page.</p>
+                    <p className="text-sm text-gray-500">Redirecting to dashboard...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (loading) {
+        return <div className="text-center mt-10">Loading logs...</div>;
+    }
 
     return (
         <section className="bg-white dark:bg-gray-900 py-8 lg:py-16">

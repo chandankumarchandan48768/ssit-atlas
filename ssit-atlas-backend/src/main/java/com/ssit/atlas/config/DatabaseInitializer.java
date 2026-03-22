@@ -28,13 +28,13 @@ public class DatabaseInitializer {
             try {
                 System.out.println("Starting MongoDB initialization...");
                 
+                // Clean up duplicate profiles FIRST (before creating unique index)
+                cleanupDuplicateProfiles(mongoTemplate, userProfileRepository);
+                
                 // Create unique index on userId field
                 mongoTemplate.indexOps(UserProfile.class)
                         .ensureIndex(new Index().on("userId", Sort.Direction.ASC).unique());
                 System.out.println("✓ Unique index on userId field ensured");
-                
-                // Clean up duplicate profiles
-                cleanupDuplicateProfiles(mongoTemplate, userProfileRepository);
                 
                 System.out.println("✓ MongoDB initialization completed successfully");
             } catch (Exception e) {

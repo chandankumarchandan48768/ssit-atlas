@@ -18,6 +18,8 @@ public class LostItem {
     private String contactInfo;
     private ItemStatus status;
     private String postedByUserId;
+    private Double latitude;
+    private Double longitude;
 
     @CreatedDate
     private LocalDateTime createdAt;
@@ -31,7 +33,8 @@ public class LostItem {
 
     public LostItem(String id, String title, String description, String imageUrl, String lastSeenNodeId,
             String location, String contactInfo,
-            ItemStatus status, String postedByUserId, LocalDateTime createdAt) {
+            ItemStatus status, String postedByUserId, LocalDateTime createdAt,
+            Double latitude, Double longitude) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -42,6 +45,8 @@ public class LostItem {
         this.status = status;
         this.postedByUserId = postedByUserId;
         this.createdAt = createdAt;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 
     public String getId() {
@@ -124,6 +129,22 @@ public class LostItem {
         this.createdAt = createdAt;
     }
 
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
+
     public static LostItemBuilder builder() {
         return new LostItemBuilder();
     }
@@ -139,6 +160,8 @@ public class LostItem {
         private ItemStatus status;
         private String postedByUserId;
         private LocalDateTime createdAt;
+        private Double latitude;
+        private Double longitude;
 
         LostItemBuilder() {
         }
@@ -193,9 +216,19 @@ public class LostItem {
             return this;
         }
 
+        public LostItemBuilder latitude(Double latitude) {
+            this.latitude = latitude;
+            return this;
+        }
+
+        public LostItemBuilder longitude(Double longitude) {
+            this.longitude = longitude;
+            return this;
+        }
+
         public LostItem build() {
             return new LostItem(id, title, description, imageUrl, lastSeenNodeId, location, contactInfo, status,
-                    postedByUserId, createdAt);
+                    postedByUserId, createdAt, latitude, longitude);
         }
     }
 }

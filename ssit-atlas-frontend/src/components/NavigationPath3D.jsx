@@ -32,10 +32,10 @@ const NavigationPath3D = ({ route, scale = 10000 }) => {
             <line ref={lineRef} geometry={geometry}>
                 <lineBasicMaterial
                     attach="material"
-                    color="#3B82F6"
-                    linewidth={3}
+                    color="#000000"
+                    linewidth={5}
                     transparent
-                    opacity={0.9}
+                    opacity={0.8}
                 />
             </line>
 
@@ -61,7 +61,7 @@ const NavigationPath3D = ({ route, scale = 10000 }) => {
                 return (
                     <mesh key={index} position={point.clone()}>
                         <cylinderGeometry args={[0.5, 0.5, 4, 8]} />
-                        <meshStandardMaterial color="#3B82F6" transparent opacity={0.6} />
+                        <meshStandardMaterial color="#333333" transparent opacity={0.6} />
                     </mesh>
                 );
             })}

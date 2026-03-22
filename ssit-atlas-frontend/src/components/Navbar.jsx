@@ -1,15 +1,16 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const token = sessionStorage.getItem('token');
+    const { token, logout } = useAuth();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     const handleLogout = () => {
-        sessionStorage.removeItem('token');
+        logout();
         navigate('/login');
     };
 
@@ -104,6 +105,32 @@ const Navbar = () => {
                                         Profile
                                         <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-blue-600 to-purple-600 transform origin-left transition-transform duration-300 ${isActive('/profile') ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
                                             }`}></span>
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link
+                                        to="/admin/users"
+                                        onClick={() => setMobileMenuOpen(false)}
+                                        className={`block py-2 px-3 rounded md:p-0 transition-all duration-300 relative group ${isActive('/admin/users')
+                                            ? 'text-orange-600 dark:text-orange-500 font-semibold'
+                                            : 'text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-500'
+                                            }`}
+                                    >
+                                        👨‍💼 Users
+                                        <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-orange-600 to-red-600 transform origin-left transition-transform duration-300 ${isActive('/admin/users') ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`}></span>
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link
+                                        to="/admin/buildings"
+                                        onClick={() => setMobileMenuOpen(false)}
+                                        className={`block py-2 px-3 rounded md:p-0 transition-all duration-300 relative group ${isActive('/admin/buildings')
+                                            ? 'text-purple-600 dark:text-purple-500 font-semibold'
+                                            : 'text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-500'
+                                            }`}
+                                    >
+                                        🏢 Buildings
+                                        <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-purple-600 to-pink-600 transform origin-left transition-transform duration-300 ${isActive('/admin/buildings') ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`}></span>
                                     </Link>
                                 </li>
                             </>

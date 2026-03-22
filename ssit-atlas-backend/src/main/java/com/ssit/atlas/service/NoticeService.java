@@ -11,15 +11,19 @@ import java.util.List;
 public class NoticeService {
 
     private final NoticeRepository noticeRepository;
+    private final AuditLogService auditLogService;
 
-    public NoticeService(NoticeRepository noticeRepository) {
+    public NoticeService(NoticeRepository noticeRepository, AuditLogService auditLogService) {
         this.noticeRepository = noticeRepository;
+        this.auditLogService = auditLogService;
     }
 
     public Notice createNotice(Notice notice) {
         notice.setCreatedAt(LocalDateTime.now());
         notice.setUpdatedAt(LocalDateTime.now());
-        return noticeRepository.save(notice);
+        notice = noticeRepository.save(notice);
+        auditLogService.logAction("NOTICE_CREATED", "Admin", "New notice created: " + notice.getTitle());
+        return notice;
     }
 
     public Notice updateNotice(String id, Notice noticeDetails) {
@@ -43,6 +47,10 @@ public class NoticeService {
 
     public List<Notice> getNoticesByDepartment(String department) {
         return noticeRepository.findByDepartmentOrderByCreatedAtDesc(department);
+    }
+
+    public List<Notice> getAllNotices() {
+        return noticeRepository.findAll();
     }
 
     public List<Notice> getPinnedNotices() {

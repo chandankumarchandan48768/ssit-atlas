@@ -1,7 +1,17 @@
 import { Link } from 'react-router-dom';
 import { MapPin, Calendar, Users, Building2, Navigation, Shield } from 'lucide-react';
+import useCountUp from '../hooks/useCountUp';
+import useInView from '../hooks/useInView';
 
 const Home = () => {
+    const [statsRef, statsInView] = useInView({ threshold: 0.3 });
+
+    // Animated stat values
+    const buildingsCount = useCountUp(15, 2000, statsInView);
+    const studentsCount = useCountUp(3000, 2500, statsInView);
+    const facultyCount = useCountUp(200, 2000, statsInView);
+    const eventsCount = useCountUp(50, 2000, statsInView);
+
     const features = [
         {
             icon: <MapPin className="w-8 h-8" />,
@@ -42,10 +52,10 @@ const Home = () => {
     ];
 
     const stats = [
-        { value: "15+", label: "Campus Buildings" },
-        { value: "3000+", label: "Active Students" },
-        { value: "200+", label: "Faculty Members" },
-        { value: "50+", label: "Events/Year" }
+        { value: buildingsCount, label: "Campus Buildings", suffix: "+" },
+        { value: studentsCount, label: "Active Students", suffix: "+" },
+        { value: facultyCount, label: "Faculty Members", suffix: "+" },
+        { value: eventsCount, label: "Events/Year", suffix: "+" }
     ];
 
     return (
@@ -103,10 +113,12 @@ const Home = () => {
                     </div>
 
                     {/* Stats Section */}
-                    <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+                    <div ref={statsRef} className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 animate-slide-up" style={{ animationDelay: '0.2s' }}>
                         {stats.map((stat, index) => (
                             <div key={index} className="glass-strong rounded-2xl p-6 hover:scale-105 transition-transform duration-300">
-                                <div className="text-4xl md:text-5xl font-bold text-white mb-2">{stat.value}</div>
+                                <div className="text-4xl md:text-5xl font-bold text-white mb-2">
+                                    {stat.value}{stat.suffix}
+                                </div>
                                 <div className="text-white/80 font-medium">{stat.label}</div>
                             </div>
                         ))}

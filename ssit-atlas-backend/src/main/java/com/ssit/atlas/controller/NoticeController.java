@@ -77,6 +77,11 @@ public class NoticeController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping
+    public ResponseEntity<List<Notice>> getAllNotices() {
+        return ResponseEntity.ok(noticeService.getAllNotices());
+    }
+
     @GetMapping("/department/{department}")
     public ResponseEntity<List<Notice>> getNoticesByDepartment(@PathVariable String department) {
         return ResponseEntity.ok(noticeService.getNoticesByDepartment(department));

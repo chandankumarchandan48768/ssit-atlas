@@ -34,22 +34,49 @@ const Dashboard = () => {
                     console.error('Failed to check profile completion:', err);
                 }
             } catch (err) {
-                console.error(err);
-                // navigate('/login');
+                console.error('Error fetching user:', err);
+                if (err.message === 'Network Error' || err.code === 'ECONNABORTED') {
+                    setUser(null);
+                }
             } finally {
                 setLoading(false);
             }
         };
 
         fetchUser();
-    }, [navigate]);
+    }, []);
 
     if (loading) {
-        return <div className="text-center mt-10">Loading...</div>;
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600 dark:text-gray-300">Loading dashboard...</p>
+                </div>
+            </div>
+        );
     }
 
     if (!user) {
-        return <div className="text-center mt-10">Please log in to view the dashboard.</div>;
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md">
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Cannot Load Dashboard</h2>
+                    <p className="text-gray-600 dark:text-gray-300 mb-4">
+                        Please ensure the backend server is running on port 8080.
+                    </p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                        Error: Cannot connect to the server or you need to log in.
+                    </p>
+                    <button
+                        onClick={() => navigate('/login')}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded"
+                    >
+                        Go to Login
+                    </button>
+                </div>
+            </div>
+        );
     }
 
     return (
@@ -138,7 +165,7 @@ const Dashboard = () => {
 };
 
 
-const AdminSection = () => (
+const AdminSection = ({ user }) => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
             <div className="flex-auto p-6">
@@ -190,7 +217,7 @@ const CulturalSection = ({ user }) => {
     );
 };
 
-const ManagementSection = () => {
+const ManagementSection = ({ user }) => {
     const [isManagingBuildings, setIsManagingBuildings] = useState(false);
 
     return (

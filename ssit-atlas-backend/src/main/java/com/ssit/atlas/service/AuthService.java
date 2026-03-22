@@ -26,14 +26,17 @@ public class AuthService {
         private final JwtUtils jwtUtils;
         private final AuthenticationManager authenticationManager;
         private final CustomUserDetailsService userDetailsService;
+        private final AuditLogService auditLogService;
 
         public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtils jwtUtils,
-                        AuthenticationManager authenticationManager, CustomUserDetailsService userDetailsService) {
+                        AuthenticationManager authenticationManager, CustomUserDetailsService userDetailsService,
+                        AuditLogService auditLogService) {
                 this.userRepository = userRepository;
                 this.passwordEncoder = passwordEncoder;
                 this.jwtUtils = jwtUtils;
                 this.authenticationManager = authenticationManager;
                 this.userDetailsService = userDetailsService;
+                this.auditLogService = auditLogService;
         }
 
         public AuthResponse register(RegisterRequest request) {
@@ -52,6 +55,7 @@ public class AuthService {
                                 .build();
 
                 userRepository.save(user);
+                auditLogService.logAction("USER_REGISTERED", user.getEmail(), "New user registered with role: " + user.getRole());
 
                 var userDetails = userDetailsService.loadUserById(user.getId());
                 var jwtToken = jwtUtils.generateToken(userDetails);

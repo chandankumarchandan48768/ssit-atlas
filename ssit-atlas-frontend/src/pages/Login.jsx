@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -8,6 +9,7 @@ const Login = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const { login } = useAuth();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -29,9 +31,8 @@ const Login = () => {
                 return;
             }
 
-            sessionStorage.setItem('token', token);
+            login(token);
             navigate('/dashboard');
-            window.location.reload();
         } catch (err) {
             console.error('Login error:', err);
             if (err.response?.data?.message) {

@@ -27,7 +27,10 @@ public class LostItemService {
 
     public LostItem createLostItem(LostItem item) {
         item.setCreatedAt(LocalDateTime.now());
-        item.setStatus(LostItem.ItemStatus.LOST);
+        // Only default to LOST if status not explicitly set
+        if (item.getStatus() == null) {
+            item.setStatus(LostItem.ItemStatus.LOST);
+        }
         return lostItemRepository.save(item);
     }
 

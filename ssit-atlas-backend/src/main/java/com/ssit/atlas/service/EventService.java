@@ -10,9 +10,11 @@ import java.util.Optional;
 @Service
 public class EventService {
     private final EventRepository eventRepository;
+    private final AuditLogService auditLogService;
 
-    public EventService(EventRepository eventRepository) {
+    public EventService(EventRepository eventRepository, AuditLogService auditLogService) {
         this.eventRepository = eventRepository;
+        this.auditLogService = auditLogService;
     }
 
     public List<Event> getAllEvents() {
@@ -28,7 +30,9 @@ public class EventService {
     }
 
     public Event createEvent(Event event) {
-        return eventRepository.save(event);
+        event = eventRepository.save(event);
+        auditLogService.logAction("EVENT_CREATED", "Admin", "New event created: " + event.getTitle());
+        return event;
     }
 
     public Event updateEvent(String id, Event updatedEvent) {
